@@ -115,6 +115,7 @@ class testApp : public ofBaseApp{
 	int count;
 	
 	freqMeter	xMeter,yMeter;
+  fMeter xMet,yMet;
 	
 	/*******************Calib*****************/
 	

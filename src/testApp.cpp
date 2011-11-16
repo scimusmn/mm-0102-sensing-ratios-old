@@ -2,6 +2,8 @@
 
 ofColor white(255,255,255);
 ofColor black(0,0,0);
+ofColor blue(0,120,206);
+ofColor red(217,83,28);
 
 void fret(double x, double y, double w, double h,double divs, double pos, bool up)
 {
@@ -28,7 +30,6 @@ void frets(double x, double y, double s, double divs, double xpos, double ypos)
 	ofLine(xpos, y+s+50, xpos, ypos);
 	ofLine(x-50, ypos, xpos, ypos);
 }
-	
 
 //--------------------------------------------------------------
 void testApp::setup(){
@@ -150,6 +151,9 @@ void testApp::setup(){
 	
 	xMeter.setup((width-sqWid)/2-530, height/2, 150, 4);
 	yMeter.setup((width+sqWid)/2+300, height/2, 150, 4);
+  
+  xMet.setup(targetFrequency, 250,false);
+  yMet.setup(targetFrequency2, 250,true);
 }
 
 
@@ -302,6 +306,9 @@ void testApp::draw(){
 	xMeter.draw(freq,((width-sqWid)/2-xMeter.w)/2,ofGetHeight()/2);
 	sprintf(freq, "%04i",int(targetFrequency));
 	yMeter.draw(freq,(width+sqWid)/2+((ofGetWidth()-(width+sqWid)/2)-yMeter.w)/2,ofGetHeight()/2);
+  
+  xMet.draw(((width-sqWid)/2-xMet.w)/2,ofGetHeight()/4);
+  yMet.draw((width+sqWid)/2+((ofGetWidth()-(width+sqWid)/2)-yMet.w)/2,ofGetHeight()/4);
 	
 	
   ofRaised(.4);
@@ -397,6 +404,8 @@ void testApp::draw(){
 
 	}
 }
+
+
 
 void testApp::overlays(int xint, int yint)
 {

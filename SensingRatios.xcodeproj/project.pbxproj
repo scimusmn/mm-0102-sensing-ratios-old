@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AA375551132920E50069C5BD /* config.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = AA375550132920680069C5BD /* config.cfg */; };
+		AAAD64A0147402D5009E0379 /* Avenir-Medium.otf in CopyFiles */ = {isa = PBXBuildFile; fileRef = AAAD649F147402D2009E0379 /* Avenir-Medium.otf */; };
 		AAE2031F1302F21000BF280A /* background.jpg in CopyFiles */ = {isa = PBXBuildFile; fileRef = AAE2031D1302F1EE00BF280A /* background.jpg */; };
 		AAE203201302F21400BF280A /* Arial.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = AAE2031C1302F1E100BF280A /* Arial.ttf */; };
 		AAE203211302F21800BF280A /* speaker.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = AAE2031B1302F1C900BF280A /* speaker.png */; };
@@ -66,6 +67,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
+				AAAD64A0147402D5009E0379 /* Avenir-Medium.otf in CopyFiles */,
 				AAE203321302F2F500BF280A /* speaker.icns in CopyFiles */,
 				AAE203201302F21400BF280A /* Arial.ttf in CopyFiles */,
 				AA375551132920E50069C5BD /* config.cfg in CopyFiles */,
@@ -98,6 +100,7 @@
 
 /* Begin PBXFileReference section */
 		AA375550132920680069C5BD /* config.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = config.cfg; path = bin/data/config.cfg; sourceTree = "<group>"; };
+		AAAD649F147402D2009E0379 /* Avenir-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Avenir-Medium.otf"; path = "bin/data/Avenir-Medium.otf"; sourceTree = "<group>"; };
 		AAB6AF2B12F09E1900D19BD6 /* freqMeter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = freqMeter.h; sourceTree = "<group>"; };
 		AAE2031B1302F1C900BF280A /* speaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker.png; path = bin/data/speaker.png; sourceTree = "<group>"; };
 		AAE2031C1302F1E100BF280A /* Arial.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Arial.ttf; path = bin/data/Arial.ttf; sourceTree = "<group>"; };
@@ -359,6 +362,7 @@
 		E4B69B4A0A3A1720003C02F2 = {
 			isa = PBXGroup;
 			children = (
+				AAAD649F147402D2009E0379 /* Avenir-Medium.otf */,
 				AAE203311302F2F200BF280A /* speaker.icns */,
 				AAE2031D1302F1EE00BF280A /* background.jpg */,
 				AAE2031C1302F1E100BF280A /* Arial.ttf */,

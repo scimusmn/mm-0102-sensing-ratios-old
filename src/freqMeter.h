@@ -13,7 +13,7 @@
 #include "ofMain.h"
 #include "ofExtended.h"
 
-extern ofColor white, black;
+extern ofColor white, black, blue, red;
 
 class freqMeter : public ofInterObj {
 public:
@@ -55,6 +55,53 @@ public:
 		ofSetColor(0, 0, 0);
 		arialHeader.drawString("Frequency",x, y-20);
 	}
+};
+
+class fMeter : public ofInterObj {
+protected:
+  ofFont title;
+  float * dispNum;
+  digitDisplay display;
+  ofImage speaker;
+  float pad;
+  bool bLeftMet;
+public:
+  void setup(float & dNum, int _w, bool isLeftMeter)
+  {
+    dispNum=&dNum;
+    w=_w;
+    title.loadFont("Avenir-Medium.otf");
+    title.setSize(21);
+    title.setMode(OF_FONT_TOP);
+    display.setup(3*_w/5, 4);
+    speaker.loadImage("speaker.png");
+    pad=5;
+    h=title.stringHeight("Kjhg")*2+pad*4+display.h*1.1;
+    bLeftMet=isLeftMeter;
+  }
+  
+  void draw(int _x, int _y)
+  {
+    int strH=title.stringHeight("Frequency");
+    x=_x, y=_y;
+    ofSetShadowDarkness(.5);
+    ofShadowRounded(x, y, w, h, pad, 10);
+    ofRaised(.2);
+    ofSetColor(white*.7);
+    ofRoundedRect(x, y, w, h, pad);
+    ofSetShadowDarkness(1);
+    ofShadowRounded(display.x-display.w*.05, display.y-display.h*.05, display.w*1.1, display.h*1.1, display.h/16, 3);
+    ofSetColor(black);
+    ofRect(display.x-display.w*.05,display.y-display.h*.05,display.w*1.1, display.h*1.1);
+    ofSetColor(blue);
+    display.draw(ssprintf("%04i",int(*dispNum)),((!bLeftMet)?x+w/10:x+w-(display.w*1.1+w/10)), y+strH+pad+display.h/4);
+    ofSetColor(black);
+    title.drawString("Frequency", display.x-display.w*.05, y+pad);
+    title.drawString("Frecuencia", display.x-display.w*.05, y+h-(pad+strH));
+    ofSetColor(white);
+    if(!bLeftMet) speaker.draw(x+9*w/10, y+(h-w/5)/2,-w/5,w/5);
+    else speaker.draw(x+w/10, y+(h-w/5)/2,w/5,w/5);
+  }
 };
 
 #endif
