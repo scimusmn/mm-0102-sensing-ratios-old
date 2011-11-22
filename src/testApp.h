@@ -59,6 +59,7 @@ class testApp : public ofBaseApp{
 		float 	phaseAdder,phaseAdder2;
 		float 	phaseAdderTarget;
 		float 	phaseAdderTarget2;
+  float volScale, volScale2;
 	
 	/*****************************Talking to the arduino *********************/
 	
@@ -96,12 +97,15 @@ class testApp : public ofBaseApp{
 	double			yOffset;
 	grid		net;
 	deque<ofPoint> lines;
-	ofTexture	gridArea;
-	ofTrueTypeFont arialHeader;
-	ofTrueTypeFont arialLabel;
+	//ofTexture	gridArea;
+	ofFont arialHeader;
+	ofFont arialLabel;
 	long		newTimer;
 	
 	/*********** Slider Predefined values *************/
+  
+  ofPoint minValue;
+  ofPoint maxValue;
 	
 	double		minVal;
 	double		maxVal;
@@ -114,8 +118,9 @@ class testApp : public ofBaseApp{
 	double		numOctaves;
 	int count;
 	
-	freqMeter	xMeter,yMeter;
   fMeter xMet,yMet;
+  
+  titleBar title;
 	
 	/*******************Calib*****************/
 	

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		AA375551132920E50069C5BD /* config.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = AA375550132920680069C5BD /* config.cfg */; };
 		AAAD64A0147402D5009E0379 /* Avenir-Medium.otf in CopyFiles */ = {isa = PBXBuildFile; fileRef = AAAD649F147402D2009E0379 /* Avenir-Medium.otf */; };
+		AAAD64F014740E24009E0379 /* freqMeter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAAD64EF14740E24009E0379 /* freqMeter.cpp */; };
 		AAE2031F1302F21000BF280A /* background.jpg in CopyFiles */ = {isa = PBXBuildFile; fileRef = AAE2031D1302F1EE00BF280A /* background.jpg */; };
 		AAE203201302F21400BF280A /* Arial.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = AAE2031C1302F1E100BF280A /* Arial.ttf */; };
 		AAE203211302F21800BF280A /* speaker.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = AAE2031B1302F1C900BF280A /* speaker.png */; };
@@ -101,6 +102,7 @@
 /* Begin PBXFileReference section */
 		AA375550132920680069C5BD /* config.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = config.cfg; path = bin/data/config.cfg; sourceTree = "<group>"; };
 		AAAD649F147402D2009E0379 /* Avenir-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Avenir-Medium.otf"; path = "bin/data/Avenir-Medium.otf"; sourceTree = "<group>"; };
+		AAAD64EF14740E24009E0379 /* freqMeter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = freqMeter.cpp; sourceTree = "<group>"; };
 		AAB6AF2B12F09E1900D19BD6 /* freqMeter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = freqMeter.h; sourceTree = "<group>"; };
 		AAE2031B1302F1C900BF280A /* speaker.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = speaker.png; path = bin/data/speaker.png; sourceTree = "<group>"; };
 		AAE2031C1302F1E100BF280A /* Arial.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Arial.ttf; path = bin/data/Arial.ttf; sourceTree = "<group>"; };
@@ -383,6 +385,7 @@
 				E4B69E1E0A3A1BDC003C02F2 /* testApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* testApp.h */,
 				AAB6AF2B12F09E1900D19BD6 /* freqMeter.h */,
+				AAAD64EF14740E24009E0379 /* freqMeter.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -551,6 +554,7 @@
 			files = (
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* testApp.cpp in Sources */,
+				AAAD64F014740E24009E0379 /* freqMeter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

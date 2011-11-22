@@ -5,6 +5,8 @@ ofColor black(0,0,0);
 ofColor blue(0,120,206);
 ofColor red(217,83,28);
 
+string serialPort="";
+
 void fret(double x, double y, double w, double h,double divs, double pos, bool up)
 {
 	ofShadowRounded(x-4, y-4, w+8, h+8, 10, 5);
@@ -24,7 +26,7 @@ void fret(double x, double y, double w, double h,double divs, double pos, bool u
 
 void frets(double x, double y, double s, double divs, double xpos, double ypos)
 {
-	fret(x, y+s+40, s, 60, divs, xpos, false);
+	fret(x, y+s+50, s, 60, divs, xpos, false);
 	fret(x-100, y, 60, s, divs, ypos, true);
 	ofSetColor(255, 0, 0,64);
 	ofLine(xpos, y+s+50, xpos, ypos);
@@ -35,16 +37,12 @@ void frets(double x, double y, double s, double divs, double xpos, double ypos)
 void testApp::setup(){
 	
 	calib=false;
-	ofSetDataPathRoot("../Resources/");
 	
 	maxVal=861;
 	minVal=0;
-	setMin=100;
 	maxValY=861;
 	minValY=0;
-	setMinY=100;
   
-  string serialPort="";
 	
 	ifstream config(ofToDataPath("config.cfg").c_str());
 	while (config.peek()!=EOF) {
@@ -53,45 +51,27 @@ void testApp::setup(){
 		vector<string> token=ofSplitString(nextLine, "=");
 		if(token.size()){
 			if(!token[0].compare("MAX_X_VAL")){
-				maxVal = ofToInt(token[1]);
+				maxValue.x=ofToInt(token[1]);
 			}
 			else if(!token[0].compare("MIN_X_VAL")){
-				minVal=ofToInt(token[1]);
+				minValue.x=ofToInt(token[1]);
 			}
 			else if(!token[0].compare("MIN_Y_VAL")){
-				minValY=ofToInt(token[1]);
+				minValue.y=ofToInt(token[1]);
 			}
 			else if(!token[0].compare("MAX_Y_VAL")){
-				maxValY=ofToInt(token[1]);
-			}
-			else if(!token[0].compare("SET_X_VAL")){
-				setMin=ofToInt(token[1]);
-			}
-			else if(!token[0].compare("SET_Y_VAL")){
-				setMinY=ofToInt(token[1]);
+				maxValue.y=ofToInt(token[1]);
 			}
       else if(!token[0].compare("SERIAL_PORT")){
 				serialPort=token[1];
 			}
 		}
-		else {
-			maxVal=861;
-			minVal=0;
-			setMin=100;
-			maxValY=861;
-			minValY=0;
-			setMinY=100;
-		}
 		
 	}
 	config.close();
 	
-	/*maxValY-=setMinY;
-	minValY-=setMinY;
 	
-	maxVal-=setMin;
-	minVal-=setMin;*/
-	octave=(maxVal-minVal)/numOctaves;
+	octave=(maxValue.x-minValue.x)/numOctaves;
 	
 	MODE=0;
 	complete=false;
@@ -101,7 +81,6 @@ void testApp::setup(){
 	newTimer=0;
 	
 	background.loadImage("background.jpg");
-	speaker.loadImage("speaker.png");
 	
 	overlayCnt=0;
 	
@@ -143,17 +122,22 @@ void testApp::setup(){
 	ofSetFrameRate(60);
 	
 	//--------------------------------------------
-	
-	serial.setup(serialPort,115200);
-	
-	arialHeader.loadFont("arial.ttf", 40);
-	arialLabel.loadFont("arial.ttf", 20);
-	
-	xMeter.setup((width-sqWid)/2-530, height/2, 150, 4);
-	yMeter.setup((width+sqWid)/2+300, height/2, 150, 4);
   
-  xMet.setup(targetFrequency, 250,false);
-  yMet.setup(targetFrequency2, 250,true);
+	serial.setup(serialPort,115200);
+  
+	arialHeader.loadFont("arial.ttf");
+  arialHeader.setSize(40);
+  
+  
+	arialLabel.loadFont("Avenir-Medium.otf");
+  arialLabel.setSize(20);
+  
+  
+  xMet.setup(targetFrequency2, 250,false);
+  yMet.setup(targetFrequency, 250,true);
+  
+  title.setup();
+  
 }
 
 
@@ -195,19 +179,23 @@ void testApp::update(){
 		if(waitForData==0) {
 			switch (data[0]) {
 				case XPOS:{
-					float curPos=xpos=data[1]+(data[2]<<8)-setMin;
+					float curPos=xpos=data[1]+(data[2]<<8)-minValue.x;
 					int base=(xpos>octave) ? 50 : 50.*xpos/octave;
 					targetFrequency = base*pow(2., (curPos/octave))/2;
 					targetFrequency = ofClamp(targetFrequency,0,6400);
 					phaseAdderTarget = (targetFrequency / (float) sampleRate) * TWO_PI;
+          volScale=pow(50./targetFrequency,.2);
+          if(volScale>1) volScale=1;
 				}
 					break;
 				case YPOS:{
-					float curPos=ypos=data[1]+(data[2]<<8)-setMinY;
+					float curPos=ypos=data[1]+(data[2]<<8)-minValue.y;
 					int base=(ypos>octave) ? 50 : 50.*ypos/octave;
 					targetFrequency2 = base*pow(2., (curPos/octave))/2;
 					targetFrequency2=ofClamp(targetFrequency2,0,6400);
 					phaseAdderTarget2 = (targetFrequency2 / (float) sampleRate) * TWO_PI;
+          volScale2=pow(50./targetFrequency2,.2);
+          if(volScale2>1) volScale2=1;
 				}
 					break;
 				case VOL:{
@@ -263,8 +251,8 @@ void testApp::draw(){
 	ofSetColor(175,175,175);
 	background.draw(0, 0,width,height);
 	
-	int xint=ofMap(xpos, minVal, maxVal, (width-sqWid)/2, (width+sqWid)/2,true);
-	int yint=ofMap(maxValY-ypos, minValY, maxValY, yOffset, yOffset+sqWid,true);
+	int xint=ofMap(xpos, 0, maxValue.x-minValue.x, (width-sqWid)/2, (width+sqWid)/2,true);
+	int yint=ofMap((maxValue.y-minValue.y)-ypos, 0, maxValue.y-minValue.y, yOffset, yOffset+sqWid,true);
 	
 	ofSetShadowDarkness( .5), ofShadowRounded((width-sqWid)/2-5, yOffset, sqWid+5, sqWid+5, 20);
 	ofSetColor(255, 255, 255);
@@ -300,25 +288,8 @@ void testApp::draw(){
 	
 	overlays(xint,yint);
   
-	
-	char freq[32];
-	sprintf(freq, "%04i",int(targetFrequency2));
-	xMeter.draw(freq,((width-sqWid)/2-xMeter.w)/2,ofGetHeight()/2);
-	sprintf(freq, "%04i",int(targetFrequency));
-	yMeter.draw(freq,(width+sqWid)/2+((ofGetWidth()-(width+sqWid)/2)-yMeter.w)/2,ofGetHeight()/2);
-  
-  xMet.draw(((width-sqWid)/2-xMet.w)/2,ofGetHeight()/4);
-  yMet.draw((width+sqWid)/2+((ofGetWidth()-(width+sqWid)/2)-yMet.w)/2,ofGetHeight()/4);
-	
-	
-  ofRaised(.4);
-  ofSetColor(white*.9);
-	ofCircle_Plus(drawRect.x/2, height/2+200, 100);
-	speaker.draw(drawRect.x/2+75, height/2+125,-150,150);
-	ofRaised(.4);
-  ofSetColor(white*.9);
-	ofCircle_Plus((drawRect.x+drawRect.width+ofGetWidth())/2, height/2+200, 100);
-	speaker.draw((drawRect.x+drawRect.width+ofGetWidth())/2-75, height/2+125,150,150);
+  xMet.draw(((width-sqWid)/2-xMet.w)/2,ofGetHeight()/2);
+  yMet.draw((width+sqWid)/2+((ofGetWidth()-(width+sqWid)/2)-yMet.w)/2,ofGetHeight()/2);
 	
 	ofSetLineWidth(6);
 	ofEnableSmoothing();
@@ -344,8 +315,15 @@ void testApp::draw(){
 	if(newTimer>ofGetElapsedTimeMillis()){
 		int mW=ofGetWidth();
 		int mH=ofGetHeight();
-		string rep="Trace the lines using the sliders.\nPress the New Activities button to access\nmore screens.";
-		ofRectangle s=arialLabel.getStringBoundingBox(rep, 0, 0);
+		string rep=\
+    "Trace the lines using the sliders.\n\
+Press the New Activities button to access\n\
+more screens.\n\
+\n\
+Trazar las lineas con los reguladores.\n\
+Pulse el boton de Nuevas Actividades para acceder\n\
+a mas pantallas.";
+		ofRectangle s=arialLabel.getBoundingBox(rep, 0, 0);
 		ofSetColor(64, 64,64);
 		ofRoundedRect((mW-(s.width+40))/2, (mH-(s.height+40))/2, s.width+40, 40+s.height, 20);
 		ofSetColor(255, 255, 255);
@@ -359,7 +337,7 @@ void testApp::draw(){
 		ofRoundedRect(150, 100, ofGetWidth()-300, ofGetHeight()-200, 20);
 		
 		char freq[32];
-		sprintf(freq, "%f",ypos+setMinY);
+		sprintf(freq, "%f",ypos+minValue.y);
 		
 		char reportString[255];
 		sprintf(reportString, "<-- yslider  xslider -->");
@@ -369,7 +347,7 @@ void testApp::draw(){
 		arialHeader.drawString(reportString,(width-w)/2, ofGetHeight()/4*2);
 		
 		arialHeader.drawString(freq,200, ofGetHeight()/4*2);
-		sprintf(freq, "%f",xpos+setMin);
+		sprintf(freq, "%f",xpos+minValue.x);
 		
 		arialHeader.drawString(freq,ofGetWidth()-(200+arialHeader.stringWidth(freq)), ofGetHeight()/4*2);
 		
@@ -387,7 +365,7 @@ void testApp::draw(){
 		
 		arialHeader.drawString(freq,ofGetWidth()-(200+arialHeader.stringWidth(freq)), ofGetHeight()/4*3);
 		
-		if(maxVal+setMin<1024&&maxValY+setMinY<1024){
+		if(maxValue.x<1024&&maxValue.y<1024){
 			sprintf(reportString, "To re-calibrate, pull back sliders and press 'r'.");
 			w= arialHeader.stringWidth(reportString);
 			h= arialHeader.stringHeight(reportString);
@@ -410,18 +388,9 @@ void testApp::draw(){
 void testApp::overlays(int xint, int yint)
 {
 	if(overlayCnt==0){
-		char reportString[255];
-		sprintf(reportString, "Try to Trace the Lines!");
-		int w= arialHeader.stringWidth(reportString);
-		int h= arialHeader.stringHeight(reportString);
-		ofRectangle box=arialHeader.getStringBoundingBox(reportString, (width-w)/2, 75);
-    ofSetColor(.6*255);
-    ofRaised(.2);
-		ofRoundedRect(box.x-5, box.y-5, box.width+10, box.height+10, 10);
-    ofSetColor(.2*255);
-		ofRoundedRect(box.x-3, box.y-3, box.width+6, box.height+6, 10);
-		ofSetColor(255, 255, 255);
-		arialHeader.drawString(reportString,(width-w)/2, 75);
+    
+    title.draw("Try to Trace the Lines", "Tratar de trazar las lineas",75);
+    
 		ofSetLineWidth(3);
 		ofSetColor(255, 64, 64);
 		for (int i=0; i< net.numdivs; i++) {
@@ -432,8 +401,11 @@ void testApp::overlays(int xint, int yint)
 		ofSetColor(128, 64, 64);
 		ofPoint disp=net.vertex(numOctaves/2, numOctaves/2);
 		string report="Unison";
-		ofRectangle g=arialLabel.getStringBoundingBox(report, 0, 0);
+		ofRectangle g=arialLabel.getBoundingBox(report, 0, 0);
+    ofSetColor(red);
 		arialLabel.drawString(report, disp.x-g.width-50,disp.y-100);
+    ofSetColor(blue);
+    arialLabel.drawString("Unisono", disp.x-arialLabel.stringWidth("Unisono")-50,disp.y-100+g.height);
 		
 		ofSetLineWidth(1);
 		ofEnableSmoothing();
@@ -444,8 +416,11 @@ void testApp::overlays(int xint, int yint)
 		ofSetColor(128, 64, 64);
 		disp=net.vertex(numOctaves/2, numOctaves/2-1);
 		report="Octave Difference";
-		g=arialLabel.getStringBoundingBox(report, 0, 0);
+		g=arialLabel.getBoundingBox(report, 0, 0);
+    ofSetColor(red);
 		arialLabel.drawString(report, disp.x+50,disp.y+g.height+50);
+    ofSetColor(blue);
+    arialLabel.drawString("Diferencia de octava", disp.x+50,disp.y+50+g.height*2);
 		
 		ofSetLineWidth(1);
 		ofEnableSmoothing();
@@ -454,18 +429,9 @@ void testApp::overlays(int xint, int yint)
 		//reducedRatios(xint, yint);
 	}
 	if(overlayCnt==1){
-		char reportString[255];
-		sprintf(reportString, "Constant Ratios");
-		int w= arialHeader.stringWidth(reportString);
-		int h= arialHeader.stringHeight(reportString);
-		ofRectangle box=arialHeader.getStringBoundingBox(reportString, (width-w)/2, 75);
-    ofSetColor(.6*255);
-    ofRaised(.2);
-		ofRoundedRect(box.x-5, box.y-5, box.width+10, box.height+10, 10);
-    ofSetColor(.2*255);
-		ofRoundedRect(box.x-3, box.y-3, box.width+6, box.height+6, 10);
-		ofSetColor(255, 255, 255);
-		arialHeader.drawString(reportString,(width-w)/2, 75);
+    
+    title.draw("Constant ratio", "Relacion constante",75);
+    
 		ofSetLineWidth(3);
 		ofSetColor(255, 64, 64);
 		ofLine(net.vertex(0,0),net.vertex(numOctaves/2, numOctaves));
@@ -486,18 +452,9 @@ void testApp::overlays(int xint, int yint)
 	}
 	
 	if(overlayCnt==2){
-		char reportString[255];
-		sprintf(reportString, "Constant Differences");
-		int w= arialHeader.stringWidth(reportString);
-		int h= arialHeader.stringHeight(reportString);
-		ofRectangle box=arialHeader.getStringBoundingBox(reportString, (width-w)/2, 75);
-    ofSetColor(.6*255);
-    ofRaised(.2);
-		ofRoundedRect(box.x-5, box.y-5, box.width+10, box.height+10, 10);
-    ofSetColor(.2*255);
-		ofRoundedRect(box.x-3, box.y-3, box.width+6, box.height+6, 10);
-		ofSetColor(255, 255, 255);
-		arialHeader.drawString(reportString,(width-w)/2, 75);
+    
+    title.draw("Constant ratio", "Diferencia constante",75);
+    
 		ofSetLineWidth(3);
 		ofSetColor(255, 64, 64);
 		ofLine(net.vertex(0,0),net.vertex(numOctaves, numOctaves));
@@ -518,18 +475,9 @@ void testApp::overlays(int xint, int yint)
 	}
 	
 	if(overlayCnt==3){
-		char reportString[255];
-		sprintf(reportString, "Can you trace the circle?");
-		int w= arialHeader.stringWidth(reportString);
-		int h= arialHeader.stringHeight(reportString);
-		ofRectangle box=arialHeader.getStringBoundingBox(reportString, (width-w)/2, 75);
-    ofSetColor(.6*255);
-    ofRaised(.2);
-		ofRoundedRect(box.x-5, box.y-5, box.width+10, box.height+10, 10);
-    ofSetColor(.2*255);
-		ofRoundedRect(box.x-3, box.y-3, box.width+6, box.height+6, 10);
-		ofSetColor(255, 255, 255);
-		arialHeader.drawString(reportString,(width-w)/2, 75);
+		
+    title.draw("Can you trace the circle?", "Se puede trazar el circulo?",75);
+    
 		ofSetLineWidth(3);
 		ofSetColor(255, 64, 64);
 		ofNoFill();
@@ -542,18 +490,7 @@ void testApp::overlays(int xint, int yint)
 	if(overlayCnt==4){
 		//reducedRatios(xint,yint);
 		
-		char reportString[255];
-		sprintf(reportString, "Ratios");
-		int w= arialHeader.stringWidth(reportString);
-		int h= arialHeader.stringHeight(reportString);
-		ofRectangle box=arialHeader.getStringBoundingBox(reportString, (width-w)/2, 75);
-		ofSetColor(.6*255);
-    ofRaised(.2);
-		ofRoundedRect(box.x-5, box.y-5, box.width+10, box.height+10, 10);
-    ofSetColor(.2*255);
-		ofRoundedRect(box.x-3, box.y-3, box.width+6, box.height+6, 10);
-		ofSetColor(255, 255, 255);
-		arialHeader.drawString(reportString,(width-w)/2, 75);
+		title.draw("Ratios", "Ratios",75);
 		
 		if(dispLines){
 			int xm=xint-(width-sqWid)/2,ym=sqWid-(yint-yOffset);
@@ -589,9 +526,9 @@ void testApp::reducedRatios(int xint, int yint){
 		if(abs(xint-k.x)<20&&abs(yint-k.y)<20){
 			char report[255];
 			sprintf(report, "%i:%i octave ratio",xm,ym);
-			ofRectangle box=arialLabel.getStringBoundingBox(report, k.x+10, k.y-10);
+			ofRectangle box=arialLabel.getBoundingBox(report, k.x+10, k.y-10);
 			ofSetColor(.6*255);
-      ofRaised(.2);
+      ofFlat();
       ofRoundedRect(box.x-5, box.y-5, box.width+10, box.height+10, 10);
       ofSetColor(.2*255);
       ofRoundedRect(box.x-3, box.y-3, box.width+6, box.height+6, 10);
@@ -625,7 +562,7 @@ void testApp::keyPressed  (int key){
 		serial.close();
 		
 	}
-	else if(key=='n'){
+	/*else if(key=='n'){
 		numOctaves--;
 		net.update(numOctaves,sqWid,sqWid, (width-sqWid)/2, yOffset);
 		octave=(maxVal-minVal)/numOctaves;
@@ -636,7 +573,7 @@ void testApp::keyPressed  (int key){
 		net.update(numOctaves,sqWid,sqWid, (width-sqWid)/2, yOffset);
 		octave=(maxVal-minVal)/numOctaves;
 		pixOctave=sqWid/numOctaves;
-	}
+	}*/
 	else if(key=='l'){
 		dispLines=!dispLines;
 	}
@@ -653,17 +590,13 @@ void testApp::keyPressed  (int key){
 	}
 	
 	else if (key=='r'&&calib){
-		if(maxVal+setMin<1024&&maxValY+setMinY<1024){
-			setMinY+=ypos;
-			setMin+=xpos;
+		if(maxValue.x<1024&&maxValue.y<1024){
 			ofstream config(ofToDataPath("config.cfg").c_str());
 			config << "MAX_X_VAL=" << maxVal <<endl; 
 			config << "MIN_X_VAL=" << minVal <<endl;
 			config << "MIN_Y_VAL=" << minValY << endl;
 			config << "MAX_Y_VAL=" << maxValY << endl;
-			config << "SET_X_VAL=" << setMin << endl;
-			config << "SET_Y_VAL=" << setMinY << endl;
-			
+			config << "SERIAL_PORT=" << serialPort << endl;
 			
 			config.close();
 		}
@@ -702,7 +635,7 @@ void testApp::windowResized(int w, int h){
 	width=ofGetWidth();
 	sqWid=(height-2*yOffset);
 	net.update(numOctaves,sqWid,sqWid, (width-sqWid)/2, yOffset);
-	octave=(maxVal-minVal)/numOctaves;
+	octave=(maxValue.x-minValue.x)/numOctaves;
 	pixOctave=sqWid/numOctaves;
 }
 //--------------------------------------------------------------
@@ -752,8 +685,8 @@ void testApp::audioRequested 	(float * output, int bufferSize, int nChannels){
 			//sample2=ofClamp(sample2*1.2, -1, 1);
 			//sample=ofClamp(sample*1.2, -1, 1);
 			//float sample2=(sample>.75)?1:(sample<-.75)?-1:0;
-			lAudio[i] = output[i*nChannels    ] = sample2 * volume * leftScale;
-			rAudio[i] = output[i*nChannels + 1] = sample * volume * rightScale;
+			lAudio[i] = output[i*nChannels    ] = sample2 * volume * volScale2 * leftScale;
+			rAudio[i] = output[i*nChannels + 1] = sample * volume * volScale * rightScale;
 		}
 	}
 
