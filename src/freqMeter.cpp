@@ -11,6 +11,11 @@
 #include "freqMeter.h"
 
 ofImage speaker;
+bool imgLoaded=false;
+
+fMeter::~fMeter(){
+  if(imgLoaded) speaker.clear();
+}
 
 void fMeter::setup(float & dNum, int _w, bool isLeftMeter)
 {
@@ -21,7 +26,8 @@ void fMeter::setup(float & dNum, int _w, bool isLeftMeter)
   title.setMode(OF_FONT_TOP);
   display.setup(3*_w/5, 4);
   
-  speaker.loadImage("speaker.png");
+  cout << ofToDataPath("speaker.png")<< endl;
+  if(!imgLoaded) speaker.loadImage("speaker.png"),imgLoaded=true,cout << "loaded\n";
   pad=5;
   h=title.stringHeight("Kjhg")*2+pad*4+display.h*1.1;
   bLeftMet=isLeftMeter;

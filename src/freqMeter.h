@@ -23,6 +23,7 @@ protected:
   float pad;
   bool bLeftMet;
 public:
+  ~fMeter();
   void setup(float & dNum, int _w, bool isLeftMeter);
   
   void draw(int _x, int _y);
